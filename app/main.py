@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import asyncio
 import json
-import uuid
 from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI, Request
@@ -59,21 +57,8 @@ async def message(request: Request):
 
 @app.get("/sse")
 async def sse() -> StreamingResponse:
-    session_id = str(uuid.uuid4())
-
     async def event_stream() -> AsyncGenerator[str, None]:
-        connected_payload = json.dumps({"session_id": session_id})
-        yield f"event: connected\ndata: {connected_payload}\n\n"
-        while True:
-            await asyncio.sleep(15)
-            yield ": ping\n\n"
+        payload = {"jsonrpc": "2.0", "method": "ready", "params": {"status": "ok"}}
+        yield f"event: message\ndata: {json.dumps(payload)}\n\n"
 
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

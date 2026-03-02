@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
-
-from fastapi.responses import StreamingResponse
 
 
 def load_app(target: str):
@@ -31,22 +30,7 @@ def run(app_target: str, host: str, port: int):
             response = __import__("asyncio").run(app._execute(method, parsed.path, body))
             self.send_response(response.status_code)
             self.send_header("Content-type", response.media_type)
-            for key, value in response.headers.items():
-                self.send_header(key, value)
             self.end_headers()
-
-            if isinstance(response, StreamingResponse):
-                async def write_stream() -> None:
-                    async for item in response.stream:
-                        self.wfile.write(item.encode("utf-8"))
-                        self.wfile.flush()
-
-                try:
-                    __import__("asyncio").run(write_stream())
-                except BrokenPipeError:
-                    return
-                return
-
             self.wfile.write(response.body)
 
     server = HTTPServer((host, port), Handler)

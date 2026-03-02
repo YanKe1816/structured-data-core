@@ -63,7 +63,6 @@ MCP_MANIFEST: JSON = {
     "name": "structured-data-core",
     "version": "1.0.0",
     "protocol": "json-rpc-2.0",
-    "base_url": "/",
     "endpoints": {"message": "/message", "sse": "/sse"},
     "tools": TOOL_DEFINITIONS,
 }

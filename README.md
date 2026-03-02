@@ -163,12 +163,3 @@ When params are invalid, JSON-RPC returns:
   }
 }
 ```
-
-
-## SSE behavior
-
-- `GET /sse` returns `text/event-stream` with `Cache-Control: no-cache` and `Connection: keep-alive`.
-- First event is immediate: `event: connected` with JSON `session_id` (UUID4).
-- Keepalive comment ping is emitted every 15 seconds as `: ping`.
-
-- `/mcp` manifest includes `base_url` for MCP discovery.
