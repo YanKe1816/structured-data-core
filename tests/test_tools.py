@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.mcp import MCP_MANIFEST, TOOL_DEFINITIONS
 
 client = TestClient(app)
 
@@ -18,17 +19,50 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
-def test_tools_list_exact_five_tools():
-    response = rpc("tools/list", {})
-    data = response.json()["result"]["tools"]
-    assert [item["name"] for item in data] == [
+def test_privacy_terms_support_exist():
+    assert client.get("/privacy").status_code == 200
+    assert client.get("/terms").status_code == 200
+    assert client.get("/support").status_code == 200
+
+
+def test_mcp_manifest_consistent_with_tools_list():
+    manifest = client.get("/mcp").json()
+    assert manifest["name"] == "structured-data-core"
+
+    list_response = rpc("tools/list", {})
+    list_tools = list_response.json()["result"]["tools"]
+    manifest_tools = manifest["tools"]
+
+    assert [item["name"] for item in list_tools] == [
         "data_validate",
         "data_normalize",
         "data_fill_defaults",
         "data_map_fields",
         "data_pick_fields",
     ]
+    assert manifest_tools == list_tools
 
+    for tool in list_tools:
+        assert tool["readOnlyHint"] is True
+        assert tool["openWorldHint"] is False
+        assert tool["destructiveHint"] is False
+
+
+
+
+def test_platform_freeze_canonical_metadata_source():
+    assert MCP_MANIFEST["tools"] is TOOL_DEFINITIONS
+
+    list_response = rpc("tools/list", {})
+    list_tools = list_response.json()["result"]["tools"]
+
+    assert list_tools == TOOL_DEFINITIONS
+
+
+def test_source_contains_required_platform_routes():
+    source = __import__("pathlib").Path("app/main.py").read_text()
+    assert '@app.get("/mcp")' in source
+    assert '@app.get("/terms")' in source
 
 def test_data_validate():
     response = rpc(

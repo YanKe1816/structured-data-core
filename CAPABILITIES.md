@@ -14,3 +14,5 @@
 - No external network reads/writes.
 - JSON-RPC 2.0 with stable error format.
 - FastAPI HTTP + minimal SSE endpoint.
+- MCP manifest endpoint `/mcp` with tool governance metadata.
+- Governance routes: `/privacy`, `/terms`, `/support`.
