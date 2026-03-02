@@ -29,8 +29,6 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 - `GET /health` -> `{"status":"ok"}`
 - `GET /privacy` -> placeholder text
 - `GET /support` -> placeholder text with support email
-- `GET /terms` -> placeholder text
-- `GET /mcp` -> MCP manifest with tool metadata
 - `GET /sse` -> basic SSE event stream
 - `POST /message` -> JSON-RPC 2.0
 
@@ -43,7 +41,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ## tools/list response
 
-Exactly five tools are returned, each with governance risk flags (`readOnlyHint=true`, `openWorldHint=false`, `destructiveHint=false`):
+Exactly five tools are returned:
 
 1. `data_validate`
 2. `data_normalize`

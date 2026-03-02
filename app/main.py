@@ -6,7 +6,7 @@ from collections.abc import AsyncGenerator
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 
-from app.mcp import MCP_MANIFEST, handle_rpc
+from app.mcp import handle_rpc
 
 app = FastAPI(title="structured-data-core")
 
@@ -21,19 +21,9 @@ def privacy() -> PlainTextResponse:
     return PlainTextResponse("Privacy placeholder: this demo service processes data in-memory only.")
 
 
-@app.get("/terms")
-def terms() -> PlainTextResponse:
-    return PlainTextResponse("Terms placeholder: deterministic rule-execution service.")
-
-
 @app.get("/support")
 def support() -> PlainTextResponse:
     return PlainTextResponse("Support placeholder: support@example.com")
-
-
-@app.get("/mcp")
-def mcp_manifest() -> JSONResponse:
-    return JSONResponse(MCP_MANIFEST)
 
 
 @app.post("/message")

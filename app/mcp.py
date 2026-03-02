@@ -20,54 +20,6 @@ TOOLS: dict[str, tuple[Callable[[JSON], JSON], Callable[[Any], list[dict[str, st
 }
 
 
-TOOL_DEFINITIONS: list[JSON] = [
-    {
-        "name": "data_validate",
-        "description": "Validate data against required/type/enum rules.",
-        "readOnlyHint": True,
-        "openWorldHint": False,
-        "destructiveHint": False,
-    },
-    {
-        "name": "data_normalize",
-        "description": "Normalize string values and track deterministic changes.",
-        "readOnlyHint": True,
-        "openWorldHint": False,
-        "destructiveHint": False,
-    },
-    {
-        "name": "data_fill_defaults",
-        "description": "Fill missing or null top-level fields with provided defaults.",
-        "readOnlyHint": True,
-        "openWorldHint": False,
-        "destructiveHint": False,
-    },
-    {
-        "name": "data_map_fields",
-        "description": "Move values across object fields using dot-path mapping.",
-        "readOnlyHint": True,
-        "openWorldHint": False,
-        "destructiveHint": False,
-    },
-    {
-        "name": "data_pick_fields",
-        "description": "Select only requested fields using dot paths.",
-        "readOnlyHint": True,
-        "openWorldHint": False,
-        "destructiveHint": False,
-    },
-]
-
-
-MCP_MANIFEST: JSON = {
-    "name": "structured-data-core",
-    "version": "1.0.0",
-    "protocol": "json-rpc-2.0",
-    "endpoints": {"message": "/message", "sse": "/sse"},
-    "tools": TOOL_DEFINITIONS,
-}
-
-
 def _error_response(request_id: Any, code: int, message: str, issues: list[dict[str, str]] | None = None) -> JSON:
     error: JSON = {"code": code, "message": message}
     if issues is not None:
@@ -97,13 +49,20 @@ def handle_rpc(body: Any) -> JSON | None:
             "jsonrpc": "2.0",
             "id": request_id,
             "result": {
-                "serverInfo": {"name": MCP_MANIFEST["name"], "version": MCP_MANIFEST["version"]},
+                "serverInfo": {"name": "structured-data-core", "version": "1.0.0"},
                 "capabilities": {"tools": {"listChanged": False}},
             },
         }
 
     if method == "tools/list":
-        return {"jsonrpc": "2.0", "id": request_id, "result": {"tools": TOOL_DEFINITIONS}}
+        tools = [
+            {"name": "data_validate"},
+            {"name": "data_normalize"},
+            {"name": "data_fill_defaults"},
+            {"name": "data_map_fields"},
+            {"name": "data_pick_fields"},
+        ]
+        return {"jsonrpc": "2.0", "id": request_id, "result": {"tools": tools}}
 
     if method == "tools/call":
         if not isinstance(params, dict):
