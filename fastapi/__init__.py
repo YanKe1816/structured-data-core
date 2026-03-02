@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import inspect
 import json
 from typing import Any, Callable
@@ -49,12 +50,10 @@ class FastAPI:
 
         if isinstance(result, Response):
             if isinstance(result, StreamingResponse):
-                # Local shim behavior: capture the first emitted chunk to avoid blocking on infinite streams.
-                first_chunk = ""
+                chunks: list[str] = []
                 async for item in result.stream:
-                    first_chunk = item
-                    break
-                return Response(first_chunk, status_code=result.status_code, media_type=result.media_type, headers=result.headers)
+                    chunks.append(item)
+                return Response("".join(chunks), status_code=result.status_code, media_type=result.media_type)
             return result
         if isinstance(result, dict):
             return JSONResponse(result)
@@ -73,14 +72,11 @@ class FastAPI:
                     break
 
         response = await self._execute(scope["method"], scope["path"], body)
-        headers = [(b"content-type", response.media_type.encode("utf-8"))]
-        for key, value in response.headers.items():
-            headers.append((key.encode("utf-8"), value.encode("utf-8")))
         await send(
             {
                 "type": "http.response.start",
                 "status": response.status_code,
-                "headers": headers,
+                "headers": [(b"content-type", response.media_type.encode("utf-8"))],
             }
         )
         await send({"type": "http.response.body", "body": response.body})

@@ -6,10 +6,9 @@ from typing import Any
 
 
 class _ClientResponse:
-    def __init__(self, status_code: int, body: bytes, headers: dict[str, str] | None = None):
+    def __init__(self, status_code: int, body: bytes):
         self.status_code = status_code
         self._body = body
-        self.headers = headers or {}
 
     def json(self) -> Any:
         return json.loads(self._body.decode("utf-8"))
@@ -40,15 +39,12 @@ class TestClient:
             await self.app(scope, receive, send)
             status = 500
             body = b""
-            headers: dict[str, str] = {}
             for message in sent_messages:
                 if message["type"] == "http.response.start":
                     status = message["status"]
-                    for key, value in message.get("headers", []):
-                        headers[key.decode("utf-8").lower()] = value.decode("utf-8")
                 if message["type"] == "http.response.body":
                     body = message.get("body", b"")
-            return _ClientResponse(status, body, headers)
+            return _ClientResponse(status, body)
 
         return asyncio.run(runner())
 

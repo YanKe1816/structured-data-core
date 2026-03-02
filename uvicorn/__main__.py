@@ -30,8 +30,6 @@ def run(app_target: str, host: str, port: int):
             response = __import__("asyncio").run(app._execute(method, parsed.path, body))
             self.send_response(response.status_code)
             self.send_header("Content-type", response.media_type)
-            for key, value in response.headers.items():
-                self.send_header(key, value)
             self.end_headers()
             self.wfile.write(response.body)
 

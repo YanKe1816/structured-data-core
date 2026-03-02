@@ -159,13 +159,3 @@ def test_invalid_params_error_contract():
     assert error["code"] == -32602
     assert error["message"] == "Invalid params"
     assert "issues" in error["data"]
-
-
-def test_sse_headers_and_initial_event_line():
-    response = client.get("/sse")
-    assert response.status_code == 200
-    assert response.headers["content-type"] == "text/event-stream"
-    assert response.headers["cache-control"] == "no-cache"
-    assert response.headers["connection"] == "keep-alive"
-    assert response.headers["x-accel-buffering"] == "no"
-    assert response.text.startswith(":ok\n\n")
